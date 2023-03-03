@@ -14,7 +14,8 @@ contract HotelManagement {
     mapping(address => uint256) public customerRoomType;
     mapping(uint256 => mapping(address => uint256)) public CustomerRecords;
     mapping(uint256 => uint256) public roomRent;
-
+ 
+   // ###################### Room Details  ###########################
     struct Rooms {
         string roomType;
         uint256 roomTypeCode;
@@ -24,8 +25,8 @@ contract HotelManagement {
     }
 
     Rooms public soloRooms = Rooms("Solo", 1, 15, 1 ether, 100 wei);
-    Rooms public duoRooms = Rooms("Duo", 1, 15, 1 ether, 200 wei);
-    Rooms public familyRooms = Rooms("Family", 1, 15, 1 ether, 300 wei);
+    Rooms public duoRooms = Rooms("Duo", 2, 10, 2 ether, 200 wei);
+    Rooms public familyRooms = Rooms("Family", 3, 5, 3 ether, 300 wei);
 
     constructor (address _setReceptionist) {
         Owner = payable(msg.sender);
@@ -56,7 +57,8 @@ contract HotelManagement {
     function availableRoom() public view returns(uint256 SoloRooms, uint256 DuoRooms, uint256 FamilyRooms){
         return(soloRooms.availableRoom, duoRooms.availableRoom, familyRooms.availableRoom);
     }
-
+    
+    // customer can choose his room paying ether
     function checkIn(uint256 _roomTypeCode) public payable{
         if(_roomTypeCode == 1)
         {
@@ -92,14 +94,16 @@ contract HotelManagement {
     // View Rent for the customer
     function viewRent() public onlyCustomer view returns(uint _RENT)
     {
-        //             this will evaluate     1/2/3
+        
         // block.timsestamp - [typePfRoom][address] => the time they checkedIn
         uint totalHoursCheckedin = block.timestamp - CustomerRecords[customerRoomType[msg.sender]][msg.sender]; 
         uint payableHours = totalHoursCheckedin / 3600;
         uint totalRent = roomRent[customerRoomType[msg.sender]] * payableHours;
         return totalRent;
     }
-
+    
+    
+    // customer can check out after paying rent
     function checkOut() public payable onlyCustomer
     {
         if(customerRoomType[msg.sender] == 1)
